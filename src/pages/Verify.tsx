@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useParams, Link } from "react-router-dom";
 import {
   ShieldCheck,
   Search,
@@ -87,11 +87,34 @@ const DEMO_SPECIMENS: Record<string, VerificationApiResponse> = {
       sanitizationStatus: "COMPLETED",
     },
   },
+  "ZT-2026-REVOKED": {
+    success: true,
+    status: "REVOKED",
+    certificateId: "ZT-2026-REVOKED",
+    issuedAt: "2026-10-25 10:14:00 UTC",
+    certificateHash: "ZT-CERT-REVOKED-E9A8F1023B1DC4B182E089A14B",
+    verificationCode: "VCODE-REVOKED-001",
+    sanitizationMethod: "NIST SP 800-88 Clear (Single Pass Overwrite)",
+    verificationMethod: "256-Point Sampled Residual Read Verification",
+    verificationResult: "REVOKED (Administrative Invalidation - Audit Chain Gap Detected)",
+    qrData: `${ENV.APP_BASE_URL}/verify/ZT-2026-REVOKED`,
+    asset: {
+      assetId: "AST-REVOKED-01",
+      deviceType: "Corporate Laptop",
+      manufacturer: "Dell",
+      model: "Latitude 5420 (256GB SSD)",
+      serialNumber: "SN-DL-REVOKED-99X",
+      storageType: "SATA SSD",
+      storageCapacity: 256,
+      sanitizationStatus: "REVOKED",
+    },
+  },
 };
 
 export const Verify: React.FC = () => {
+  const { certificateId } = useParams<{ certificateId?: string }>();
   const [searchParams] = useSearchParams();
-  const initialId = searchParams.get("id") || "";
+  const initialId = certificateId || searchParams.get("id") || "";
 
   const [certInput, setCertInput] = useState(initialId);
   const [loading, setLoading] = useState(false);
@@ -150,6 +173,19 @@ export const Verify: React.FC = () => {
     }
   }, [initialId]);
 
+  const isRevoked = result?.status === "REVOKED";
+  const isExpired = result?.status === "EXPIRED";
+  const borderStyle = isRevoked
+    ? "border-red-500/50"
+    : isExpired
+    ? "border-amber-500/50"
+    : "border-emerald-500/40";
+  const badgeStyle = isRevoked
+    ? "bg-red-500/10 border-red-500/40 text-red-400"
+    : isExpired
+    ? "bg-amber-500/10 border-amber-500/40 text-amber-400"
+    : "bg-emerald-500/10 border-emerald-500/40 text-emerald-400";
+
   return (
     <div className="pt-28 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
       {/* Page Header */}
@@ -197,7 +233,7 @@ export const Verify: React.FC = () => {
                   }}
                   className="text-cyan-400 hover:underline mx-1"
                 >
-                  ZT-2026-23478C
+                  ZT-2026-23478C (Live/Valid)
                 </button>
                 •
                 <button
@@ -206,9 +242,20 @@ export const Verify: React.FC = () => {
                     setCertInput("ZT-2026-8F1A92");
                     handleVerify("ZT-2026-8F1A92");
                   }}
-                  className="text-cyan-400 hover:underline mx-1"
+                  className="text-teal-400 hover:underline mx-1"
                 >
-                  ZT-2026-8F1A92
+                  ZT-2026-8F1A92 (Demo)
+                </button>
+                •
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCertInput("ZT-2026-REVOKED");
+                    handleVerify("ZT-2026-REVOKED");
+                  }}
+                  className="text-red-400 hover:underline mx-1"
+                >
+                  ZT-2026-REVOKED (Revoked)
                 </button>
               </div>
 
@@ -248,43 +295,90 @@ export const Verify: React.FC = () => {
       {/* Verification Query Result Card */}
       {result && (
         <div className="max-w-3xl mx-auto mb-16 animate-in fade-in duration-300">
-          <div className="rounded-2xl bg-cyber-900 border-2 border-emerald-500/40 p-6 md:p-8 shadow-2xl text-slate-200 relative overflow-hidden">
-            {/* Specimen Disclaimer Banner */}
-            {isDemoData && (
-              <div className="mb-6 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    Verified Demo Specimen — Retrieved from local verification fixture.
-                  </span>
-                </div>
-                <span className="font-mono text-[10px] uppercase font-bold tracking-wider">DEMO</span>
-              </div>
-            )}
-
-            {/* Certificate Status Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div>
+          <div className={`rounded-2xl bg-cyber-900 border-2 ${borderStyle} p-6 md:p-8 shadow-2xl text-slate-200 relative overflow-hidden`}>
+              {/* Data Provenance Banner */}
+              {isDemoData ? (
+                <div className="mb-6 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
-                      Authenticated Record
+                    <Info className="w-4 h-4 flex-shrink-0 text-amber-400" />
+                    <span>
+                      Demonstration Specimen — Retrieved from local evaluation fixture (Backend offline or demo specimen queried).
                     </span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-                    Certificate of Media Sanitization
-                  </h3>
+                  <span className="font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                    DEMO FIXTURE
+                  </span>
+                </div>
+              ) : (
+                <div className="mb-6 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-cyan-400" />
+                    <span>
+                      Live Registry Record — Authenticated directly against live backend API ({ENV.CERTIFICATE_API_URL}).
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                    LIVE REGISTRY
+                  </span>
+                </div>
+              )}
+
+              {/* Revocation Warning Box */}
+              {isRevoked && (
+                <div className="mb-6 p-4 rounded-xl bg-red-950/60 border border-red-500/50 text-red-200 text-xs flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold text-red-300 uppercase">Warning: Certificate Revoked</span>
+                    <p className="mt-1 text-red-200/90 leading-relaxed">
+                      This digital erasure certificate was revoked by an authorized administrator or compliance auditor. It does NOT represent valid sanitization evidence. Secondary buyers and recyclers must not accept this hardware as verifiably sanitized.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Certificate Status Header */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-5 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    isRevoked
+                      ? "bg-red-500/10 border border-red-500/30 text-red-400"
+                      : isExpired
+                      ? "bg-amber-500/10 border border-amber-500/30 text-amber-400"
+                      : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                  }`}>
+                    {isRevoked ? (
+                      <AlertTriangle className="w-6 h-6" />
+                    ) : isExpired ? (
+                      <AlertTriangle className="w-6 h-6" />
+                    ) : (
+                      <ShieldCheck className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-mono uppercase tracking-wider ${
+                        isRevoked ? "text-red-400" : isExpired ? "text-amber-400" : "text-cyan-400"
+                      }`}>
+                        {isRevoked ? "Revoked Record" : isExpired ? "Expired Record" : "Authenticated Record"}
+                      </span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                      Certificate of Media Sanitization
+                    </h3>
+                  </div>
+                </div>
+
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-mono font-bold ${badgeStyle}`}>
+                  {isRevoked ? (
+                    <XCircle className="w-4 h-4" />
+                  ) : isExpired ? (
+                    <AlertTriangle className="w-4 h-4" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4" />
+                  )}
+                  STATUS: {result.status || "VALID"}
                 </div>
               </div>
-
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs font-mono font-bold">
-                <CheckCircle2 className="w-4 h-4" />
-                STATUS: {result.status || "VALID"}
-              </div>
-            </div>
 
             {/* Specifications */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">

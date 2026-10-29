@@ -70,12 +70,16 @@ export const Contact: React.FC = () => {
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold text-white">Inquiry Received</h3>
+            <h3 className="text-2xl font-bold text-white">
+              {ENV.CONTACT_API_URL ? "Inquiry Dispatched" : "Inquiry Recorded (Demonstration Mode)"}
+            </h3>
             <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-              Thank you for connecting with the ZEROTrace AI team regarding Smart India Hackathon problem statement SIH25070.
+              {ENV.CONTACT_API_URL
+                ? "Your message has been forwarded to the configured contact endpoint."
+                : "No external contact API endpoint is currently configured (VITE_CONTACT_API_URL is unset). Your inquiry has been validated and captured in browser session state for demonstration purposes."}
             </p>
             <div className="p-3 rounded-lg bg-cyber-950 border border-slate-800 text-xs font-mono text-slate-400 max-w-md mx-auto">
-              Recorded inquiry for: <span className="text-cyan-300">{formData.email}</span>
+              Sender: <span className="text-cyan-300">{formData.email}</span> • Status: <span className="text-emerald-400">{ENV.CONTACT_API_URL ? "Delivered" : "Simulated Local"}</span>
             </div>
             <button
               onClick={() => {
@@ -95,6 +99,14 @@ export const Contact: React.FC = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
+            {!ENV.CONTACT_API_URL && (
+              <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono flex items-center gap-2">
+                <Info className="w-4 h-4 flex-shrink-0" />
+                <span>
+                  Demonstration Mode: VITE_CONTACT_API_URL is unconfigured. Inquiries will be validated client-side and simulated locally.
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-mono text-slate-300 uppercase mb-2">
@@ -102,6 +114,8 @@ export const Contact: React.FC = () => {
                 </label>
                 <div className="relative">
                   <input
+                    id="contact-name"
+                    name="name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -114,11 +128,13 @@ export const Contact: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-slate-300 uppercase mb-2">
+                <label htmlFor="contact-email" className="block text-xs font-mono text-slate-300 uppercase mb-2">
                   Email Address *
                 </label>
                 <div className="relative">
                   <input
+                    id="contact-email"
+                    name="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -171,6 +187,8 @@ export const Contact: React.FC = () => {
                 Message *
               </label>
               <textarea
+                id="contact-message"
+                name="message"
                 rows={5}
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
