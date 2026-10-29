@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #020610;
+    --bg-surface: #040b17;
+    --bg-card: #071224;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-cyan: rgba(0, 240, 255, 0.25);
+    --neon-cyan: #00f0ff;
+    --neon-teal: #00e5a3;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020610;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0d1e38;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #18335c;
+}
+
+/* Cyber Technical Grid */
+.bg-grid {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+}
+
+.bg-grid-dense {
+  background-size: 18px 18px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Glowing text effects */
+.glow-text-cyan {
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.glow-text-teal {
+  text-shadow: 0 0 20px rgba(0, 229, 163, 0.4);
+}
+
+/* Glassmorphism card */
+.glass-panel {
+  background: rgba(7, 18, 36, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.12);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 30px -5px rgba(0, 240, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Security Guilloche Border */
+.guilloche-border {
+  border: 2px solid #00f0ff;
+  outline: 1px dashed rgba(0, 240, 255, 0.4);
+  outline-offset: 4px;
+}
