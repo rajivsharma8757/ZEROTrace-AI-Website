@@ -38,6 +38,7 @@ jobs:
           VITE_EMPLOYEE_APP_URL: "https://rajivsharma8757.github.io/ZEROTrace-AI-Platform/employee"
           VITE_AUDITOR_APP_URL: "https://rajivsharma8757.github.io/ZEROTrace-AI-Platform/admin"
           VITE_CUSTOMER_APP_URL: "https://rajivsharma8757.github.io/ZEROTrace-AI-Platform/customer"
+          VITE_CERTIFICATE_VERIFY_URL: ${{ secrets.VITE_CERTIFICATE_VERIFY_URL || vars.VITE_CERTIFICATE_VERIFY_URL || 'https://zerotrace-ai-backend.onrender.com/api/certificates' }}
         run: |
           npm run build
           cp dist/index.html dist/404.html
